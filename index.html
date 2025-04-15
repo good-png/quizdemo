@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>얼굴 왜곡 퀴즈 게임</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.css">
+    <style>
+/* Global Styles */
+:root {
+  --bg-color: #0f1c2e;
+  --text-color: #e0e0e0;
+  --accent-color: #ff5e62;
+  --secondary-color: #1ce3cf;
+  --error-color: #ff3a47;
+  --success-color: #26e289;
+  --container-bg: rgba(30, 40, 60, 0.8);
+  --quiz-bg: rgba(20, 30, 45, 0.9);
+}
+
+body {
+  font-family: 'Courier New', monospace;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-image: 
+    linear-gradient(45deg, rgba(0, 0, 0, 0.2) 25%, transparent 25%), 
+    linear-gradient(-45deg, rgba(0, 0, 0, 0.2) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(0, 0, 0, 0.2) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(0, 0, 0, 0.2) 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+.container {
+  width: 90%;
+  max-width: 900px;
+  background-color: var(--container-bg);
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  margin: 20px auto;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Glitch Effect */
+.glitch-container {
+  position: relative;
+}
+
+.glitch-text {
+  position: relative;
+  display: inline-block;
+  color: var(--text-color);
+  font-size: 2.5rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-shadow: 
+    0.05em 0 0 rgba(255, 0, 0, 0.75),
+    -0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
+    0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+  animation: glitch 2s infinite;
+}
+
+@keyframes glitch {
+  0% { text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75), -0.05em -0.025em 0 rgba(0, 255, 0, 0.75), -0.025em 0.05em 0 rgba(0, 0, 255, 0.75); }
+  14% { text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75), -0.05em -0.025em 0 rgba(0, 255, 0, 0.75), -0.025em 0.05em 0 rgba(0, 0, 255, 0.75); }
+  15% { text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75), 0.025em 0.025em 0 rgba(0, 255, 0, 0.75), -0.05em -0.05em 0 rgba(0, 0, 255, 0.75); }
+  49% { text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75), 0.025em 0.025em 0 rgba(0, 255, 0, 0.75), -0.05em -0.05em 0 rgba(0, 0, 255, 0.75); }
+  50% { text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75), 0.05em 0 0 rgba(0, 255, 0, 0.75), 0 -0.05em 0 rgba(0, 0, 255, 0.75); }
+  99% { text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75), 0.05em 0 0 rgba(0, 255, 0, 0.75), 0 -0.05em 0 rgba(0, 0, 255, 0.75); }
+  100% { text-shadow: -0.025em 0 0 rgba(255, 0, 0, 0.75), -0.025em -0.025em 0 rgba(0, 255, 0, 0.75), -0.025em -0.05em 0 rgba(0, 0, 255, 0.75); }
+}
+
+/* Header */
+header {
+  text-align: center;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+h1 {
+  margin: 0;
+  padding: 10px 0;
+}
+
+/* Game sections */
+.section {
+  background-color: var(--quiz-bg);
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid var(--secondary-color);
+  box-shadow: 0 0 10px rgba(28, 227, 207, 0.2);
+  transition: all 0.3s ease;
+}
+
+.section:hover {
+  box-shadow: 0 0 15px rgba(28, 227, 207, 0.4);
+}
+
+/* Upload section */
+#upload-section {
+  text-align: center;
+}
+
+.upload-box {
+  border: 2px dashed var(--secondary-color);
+  border-radius: 5px;
+  padding: 30px;
+  margin: 20px 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.upload-box:hover {
+  border-color: var(--accent-color);
+  background-color: rgba(255, 94, 98, 0.1);
+}
+
+.upload-box p {
+  margin: 10px 0 0;
+}
+
+.file-input {
+  display: none;
+}
+
+/* Quiz section */
+#quiz-section {
+  display: none;
+}
+
+.question-container {
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 15px;
+}
+
+.question {
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  font-weight: bold;
+  color: var(--secondary-color);
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.option {
+  background-color: rgba(30, 40, 60, 0.6);
+  border: 1px solid var(--secondary-color);
+  border-radius: 5px;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.option:hover {
+  background-color: rgba(28, 227, 207, 0.2);
+}
+
+.option.selected {
+  background-color: var(--secondary-color);
+  color: var(--bg-color);
+}
+
+.option.correct {
+  background-color: var(--success-color);
+  color: #000;
+}
+
+.option.incorrect {
+  background-color: var(--error-color);
+  color: #fff;
+}
+
+/* Image display */
+.image-container {
+  text-align: center;
+  margin: 20px 0;
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.image-container img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  border-radius: 8px;
+}
+
+.glitch-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, rgba(255, 94, 98, 0.1), rgba(28, 227, 207, 0.1));
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Buttons */
+.btn {
+  background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  margin: 5px;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 94, 98, 0.4);
+}
+
+.btn:active {
+  transform: translateY(0px);
+}
+
+.btn-reset {
+  background: linear-gradient(135deg, #3a3a3a, #1a1a1a);
+}
+
+/* Results */
+#result-section {
+  display: none;
+  text-align: center;
+}
+
+.result-message {
+  font-size: 1.5rem;
+  margin: 20px 0;
+}
+
+/* Feedback messages */
+.feedback {
+  padding: 10px;
+  border-radius: 5px;
+  margin: 10px 0;
+  font-weight: bold;
+}
+
+.correct-feedback {
+  background-color: rgba(38, 226, 137, 0.2);
+  color: var(--success-color);
+}
+
+.incorrect-feedback {
+  background-color: rgba(255, 58, 71, 0.2);
+  color: var(--error-color);
+}
+
+/* Progress indicator */
+.progress-container {
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  margin: 15px 0;
+}
+
+.progress-bar {
+  height: 10px;
+  background: linear-gradient(to right, var(--secondary-color), var(--accent-color));
+  border-radius: 5px;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+/* Distortion level indicator */
+.distortion-level {
+  text-align: center;
+  margin: 10px 0;
+  font-size: 0.9rem;
+}
+
+.level-indicator {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  margin: 0 5px;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.level-indicator.active {
+  background-color: var(--accent-color);
+}
+
+/* Loading spinner */
+.loading-spinner {
+  display: none;
+  width: 40px;
+  height: 40px;
+  margin: 20px auto;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 4px solid var(--secondary-color);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .container {
+    width: 95%;
+    padding: 15px;
+  }
+  
+  .glitch-text {
+    font-size: 2rem;
+  }
+  
+  .options {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Scanning effect animation */
+.scanning {
+  position: relative;
+}
+
+.scanning::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(28, 227, 207, 0.4) 50%,
+    transparent 100%
+  );
+  animation: scan 2s infinite;
+}
+
+@keyframes scan {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Glitch animation for images */
+.image-glitch {
+  animation: imageGlitch 0.5s infinite;
+}
+
+@keyframes imageGlitch {
+  0% { transform: translate(0); filter: hue-rotate(0deg); }
+  10% { transform: translate(-2px, 2px); filter: hue-rotate(15deg); }
+  20% { transform: translate(2px, -2px); filter: hue-rotate(30deg); }
+  30% { transform: translate(-2px, -2px); filter: hue-rotate(45deg); }
+  40% { transform: translate(2px, 2px); filter: hue-rotate(60deg); }
+  50% { transform: translate(0); filter: hue-rotate(75deg); }
+  60% { transform: translate(-1px, 1px); filter: hue-rotate(90deg); }
+  70% { transform: translate(1px, -1px); filter: hue-rotate(105deg); }
+  80% { transform: translate(-1px, -1px); filter: hue-rotate(120deg); }
+  90% { transform: translate(1px, 1px); filter: hue-rotate(135deg); }
+  100% { transform: translate(0); filter: hue-rotate(0deg); }
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="glitch-container">
+                <h1 class="glitch-text">얼굴 왜곡 퀴즈</h1>
+            </div>
+            <p>퀴즈에 답하세요. 틀릴 때마다 당신의 얼굴이 예술적으로 왜곡됩니다!</p>
+        </header>
+        
+        <!-- Upload Section -->
+        <section id="upload-section" class="section">
+            <h2>시작하기</h2>
+            <p>얼굴 사진을 업로드하여 게임을 시작하세요.</p>
+            <div id="upload-box" class="upload-box scanning">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-upload">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <p>클릭하여 사진 업로드</p>
+            </div>
+            <input type="file" id="file-input" class="file-input" accept="image/*">
+            <div id="loading-spinner" class="loading-spinner"></div>
+        </section>
+        
+        <!-- Quiz Section -->
+        <section id="quiz-section" class="section" style="display: none;">
+            <div class="row">
+                <div class="col-md-6">
+                    <h2>퀴즈</h2>
+                    <div class="progress-container">
+                        <div id="progress-bar" class="progress-bar"></div>
+                    </div>
+                    
+                    <div id="question-container" class="question-container">
+                        <!-- Question will be inserted here by JS -->
+                    </div>
+                    
+                    <div id="feedback-message" class="feedback"></div>
+                    
+                    <button id="submit-btn" class="btn">답변 제출</button>
+                    <button class="btn btn-reset">다시 시작</button>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="image-container">
+                        <img id="preview-image" alt="업로드된 이미지">
+                        <div class="glitch-overlay"></div>
+                    </div>
+                    
+                    <div class="distortion-level">
+                        왜곡 레벨: 
+                        <div id="distortion-indicators" class="distortion-indicators">
+                            <!-- Distortion level indicators will be added here by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="loading-spinner" class="loading-spinner"></div>
+        </section>
+        
+        <!-- Result Section -->
+        <section id="result-section" class="section" style="display: none;">
+            <h2>결과</h2>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="image-container">
+                        <img id="result-image" alt="결과 이미지">
+                        <div class="glitch-overlay"></div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div id="result-message" class="result-message"></div>
+                    <button class="btn btn-reset">다시 시작</button>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <!-- Scripts -->
+    <script>
+// Face Detection JavaScript Module
+/**
+ * Face Detection Utilities for Client-Side Processing
+ * This is a simplified version that doesn't use API calls
+ * but simulates detection by focusing on the center of the image.
+ */
+
+// Detect a face region in an uploaded image (simulation)
+function simulateFaceDetection(imageElement) {
+    return new Promise((resolve) => {
+        // Create a canvas to work with the image
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas dimensions to match image
+        canvas.width = imageElement.naturalWidth;
+        canvas.height = imageElement.naturalHeight;
+        
+        // Draw the image on canvas
+        ctx.drawImage(imageElement, 0, 0);
+        
+        // Simulate face detection by assuming the face is in the center
+        // In a real implementation, this would use a proper face detection API
+        const centerX = Math.floor(canvas.width / 2);
+        const centerY = Math.floor(canvas.height / 2);
+        
+        // Create a face region approximately in the center
+        // Size is about 60% of the smallest dimension
+        const size = Math.floor(Math.min(canvas.width, canvas.height) * 0.6);
+        
+        const faceRegion = {
+            x: centerX - size / 2,
+            y: centerY - size / 2,
+            width: size,
+            height: size
+        };
+        
+        // Add some random facial feature points (simulation)
+        // In a real implementation, these would be actual detected facial landmarks
+        const features = {
+            leftEye: {
+                x: faceRegion.x + faceRegion.width * 0.3,
+                y: faceRegion.y + faceRegion.height * 0.4
+            },
+            rightEye: {
+                x: faceRegion.x + faceRegion.width * 0.7,
+                y: faceRegion.y + faceRegion.height * 0.4
+            },
+            nose: {
+                x: faceRegion.x + faceRegion.width * 0.5,
+                y: faceRegion.y + faceRegion.height * 0.5
+            },
+            mouth: {
+                x: faceRegion.x + faceRegion.width * 0.5,
+                y: faceRegion.y + faceRegion.height * 0.7,
+                width: faceRegion.width * 0.4,
+                height: faceRegion.height * 0.1
+            }
+        };
+        
+        // Resolve with the detected face data
+        resolve({
+            faceRegion,
+            features
+        });
+    });
+}
+
+// Apply distortion specifically to facial features
+function distortFacialFeatures(canvas, faceData, distortionLevel) {
+    const ctx = canvas.getContext('2d');
+    
+    // Get face region and features
+    const { faceRegion, features } = faceData;
+    
+    // Get the image data for the face region
+    const imageData = ctx.getImageData(
+        faceRegion.x, faceRegion.y, 
+        faceRegion.width, faceRegion.height
+    );
+    
+    // Apply different distortions based on level
+    const data = imageData.data;
+    
+    // Apply different effects based on distortion level
+    switch(distortionLevel) {
+        case 1:
+            // Slightly distort eyes - change color
+            distortEyeRegion(ctx, features.leftEye, 10);
+            distortEyeRegion(ctx, features.rightEye, 10);
+            break;
+            
+        case 2:
+            // Distort eyes and nose
+            distortEyeRegion(ctx, features.leftEye, 15);
+            distortEyeRegion(ctx, features.rightEye, 15);
+            distortNoseRegion(ctx, features.nose, 10);
+            break;
+            
+        case 3:
+            // Distort all features
+            distortEyeRegion(ctx, features.leftEye, 20);
+            distortEyeRegion(ctx, features.rightEye, 20);
+            distortNoseRegion(ctx, features.nose, 15);
+            distortMouthRegion(ctx, features.mouth, 15);
+            break;
+            
+        case 4:
+            // Stronger distortion of all features
+            distortEyeRegion(ctx, features.leftEye, 25);
+            distortEyeRegion(ctx, features.rightEye, 25);
+            distortNoseRegion(ctx, features.nose, 20);
+            distortMouthRegion(ctx, features.mouth, 20);
+            // Add some overall distortion to face region
+            distortRegion(ctx, faceRegion, 10);
+            break;
+            
+        case 5:
+            // Extreme distortion of everything
+            distortEyeRegion(ctx, features.leftEye, 30);
+            distortEyeRegion(ctx, features.rightEye, 30);
+            distortNoseRegion(ctx, features.nose, 25);
+            distortMouthRegion(ctx, features.mouth, 25);
+            // Add extreme overall distortion to face region
+            distortRegion(ctx, faceRegion, 20);
+            break;
+    }
+    
+    // Put the modified image data back
+    ctx.putImageData(imageData, faceRegion.x, faceRegion.y);
+}
+
+// Helper function to distort eye region
+function distortEyeRegion(ctx, eye, radius) {
+    const imageData = ctx.getImageData(
+        eye.x - radius, eye.y - radius,
+        radius * 2, radius * 2
+    );
+    
+    const data = imageData.data;
+    const width = radius * 2;
+    
+    // Apply a swirl effect
+    const centerX = radius;
+    const centerY = radius;
+    
+    for (let y = 0; y < width; y++) {
+        for (let x = 0; x < width; x++) {
+            // Distance from center
+            const dx = x - centerX;
+            const dy = y - centerY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < radius) {
+                // Calculate swirl
+                const angle = Math.atan2(dy, dx) + (1.0 - distance / radius) * 2;
+                const newX = Math.floor(centerX + Math.cos(angle) * distance);
+                const newY = Math.floor(centerY + Math.sin(angle) * distance);
+                
+                // Boundaries check
+                if (newX >= 0 && newX < width && newY >= 0 && newY < width) {
+                    const oldIndex = (y * width + x) * 4;
+                    const newIndex = (newY * width + newX) * 4;
+                    
+                    // Copy pixels
+                    data[oldIndex] = data[newIndex];
+                    data[oldIndex + 1] = data[newIndex + 1];
+                    data[oldIndex + 2] = data[newIndex + 2];
+                }
+            }
+        }
+    }
+    
+    ctx.putImageData(imageData, eye.x - radius, eye.y - radius);
+}
+
+// Helper function to distort nose region
+function distortNoseRegion(ctx, nose, radius) {
+    const imageData = ctx.getImageData(
+        nose.x - radius, nose.y - radius,
+        radius * 2, radius * 2
+    );
+    
+    const data = imageData.data;
+    const width = radius * 2;
+    
+    // Apply a bulge effect
+    const centerX = radius;
+    const centerY = radius;
+    const bulgeStrength = 2.0;
+    
+    for (let y = 0; y < width; y++) {
+        for (let x = 0; x < width; x++) {
+            // Distance from center
+            const dx = x - centerX;
+            const dy = y - centerY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < radius) {
+                // Calculate bulge
+                const distortionFactor = 1.0 - Math.pow(distance / radius, bulgeStrength);
+                const newX = Math.floor(x - dx * distortionFactor);
+                const newY = Math.floor(y - dy * distortionFactor);
+                
+                // Boundaries check
+                if (newX >= 0 && newX < width && newY >= 0 && newY < width) {
+                    const oldIndex = (y * width + x) * 4;
+                    const newIndex = (newY * width + newX) * 4;
+                    
+                    // Copy pixels
+                    data[oldIndex] = data[newIndex];
+                    data[oldIndex + 1] = data[newIndex + 1];
+                    data[oldIndex + 2] = data[newIndex + 2];
+                }
+            }
+        }
+    }
+    
+    ctx.putImageData(imageData, nose.x - radius, nose.y - radius);
+}
+
+// Helper function to distort mouth region
+function distortMouthRegion(ctx, mouth, margin) {
+    const imageData = ctx.getImageData(
+        mouth.x - mouth.width/2 - margin, 
+        mouth.y - mouth.height/2 - margin,
+        mouth.width + margin*2, 
+        mouth.height + margin*2
+    );
+    
+    const data = imageData.data;
+    const width = mouth.width + margin*2;
+    const height = mouth.height + margin*2;
+    
+    // Apply a wave distortion
+    for (let y = 0; y < height; y++) {
+        const waveAmplitude = 3.0;
+        const waveFrequency = 0.1;
+        const xOffset = Math.sin(y * waveFrequency) * waveAmplitude;
+        
+        for (let x = 0; x < width; x++) {
+            const srcX = Math.floor(x + xOffset);
+            
+            if (srcX >= 0 && srcX < width) {
+                const dstIndex = (y * width + x) * 4;
+                const srcIndex = (y * width + srcX) * 4;
+                
+                // Copy pixels
+                data[dstIndex] = data[srcIndex];
+                data[dstIndex + 1] = data[srcIndex + 1];
+                data[dstIndex + 2] = data[srcIndex + 2];
+            }
+        }
+    }
+    
+    ctx.putImageData(
+        imageData, 
+        mouth.x - mouth.width/2 - margin, 
+        mouth.y - mouth.height/2 - margin
+    );
+}
+
+// Helper function to distort a general region
+function distortRegion(ctx, region, strength) {
+    const imageData = ctx.getImageData(
+        region.x, region.y,
+        region.width, region.height
+    );
+    
+    const data = imageData.data;
+    
+    // Apply noise and color distortion
+    for (let i = 0; i < data.length; i += 4) {
+        if (Math.random() < 0.1) {
+            // Apply noise to random pixels
+            data[i] = Math.min(255, data[i] + (Math.random() * 2 - 1) * strength * 5);
+            data[i+1] = Math.min(255, data[i+1] + (Math.random() * 2 - 1) * strength * 5);
+            data[i+2] = Math.min(255, data[i+2] + (Math.random() * 2 - 1) * strength * 5);
+        }
+        
+        // Shift color channels
+        if (i % (16 * strength) < 4 * strength) {
+            // Swap red and blue channels in some regions
+            const temp = data[i];
+            data[i] = data[i+2];
+            data[i+2] = temp;
+        }
+    }
+    
+    ctx.putImageData(imageData, region.x, region.y);
+}
+
+// Image Processor JavaScript Module
+/**
+ * Image Processing Utilities for the Face Distortion Quiz Game
+ * This script contains client-side image processing functions
+ */
+
+// Apply glitch effect to an image element
+function applyGlitchEffect(imageElement) {
+    // Add CSS class for glitch animation
+    imageElement.classList.add('image-glitch');
+    
+    // Remove the class after animation completes
+    setTimeout(() => {
+        imageElement.classList.remove('image-glitch');
+    }, 500);
+}
+
+// Generate a preview of distorted image using canvas
+function previewDistortion(imageElement, level) {
+    // Create a canvas element
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Set canvas dimensions to match image
+    canvas.width = imageElement.naturalWidth;
+    canvas.height = imageElement.naturalHeight;
+    
+    // Draw the image on canvas
+    ctx.drawImage(imageElement, 0, 0);
+    
+    // Apply distortion effects based on level
+    applyCanvasDistortion(ctx, canvas.width, canvas.height, level);
+    
+    // Return the data URL of the processed canvas
+    return canvas.toDataURL('image/jpeg');
+}
+
+// Apply distortion effects to a canvas context
+function applyCanvasDistortion(ctx, width, height, level) {
+    // Get the image data
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const data = imageData.data;
+    
+    // Different distortion effects based on level
+    switch (level) {
+        case 1:
+            // Minor color shift
+            for (let i = 0; i < data.length; i += 4) {
+                data[i] = data[i] * 1.1;     // R
+                data[i+2] = data[i+2] * 0.9;  // B
+            }
+            break;
+            
+        case 2:
+            // Pixelation effect
+            const blockSize = 10;
+            for (let y = 0; y < height; y += blockSize) {
+                for (let x = 0; x < width; x += blockSize) {
+                    const pixelIndex = (y * width + x) * 4;
+                    const r = data[pixelIndex];
+                    const g = data[pixelIndex + 1];
+                    const b = data[pixelIndex + 2];
+                    
+                    // Fill block with the same color
+                    for (let by = 0; by < blockSize && y + by < height; by++) {
+                        for (let bx = 0; bx < blockSize && x + bx < width; bx++) {
+                            const blockPixelIndex = ((y + by) * width + (x + bx)) * 4;
+                            data[blockPixelIndex] = r;
+                            data[blockPixelIndex + 1] = g;
+                            data[blockPixelIndex + 2] = b;
+                        }
+                    }
+                }
+            }
+            break;
+            
+        case 3:
+            // RGB shift
+            const copyData = new Uint8ClampedArray(data);
+            const shiftAmount = 5;
+            
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const pixelIndex = (y * width + x) * 4;
+                    
+                    // Shift red channel to the right
+                    if (x + shiftAmount < width) {
+                        const shiftedIndex = (y * width + (x + shiftAmount)) * 4;
+                        data[shiftedIndex] = copyData[pixelIndex];
+                    }
+                    
+                    // Shift blue channel to the left
+                    if (x - shiftAmount >= 0) {
+                        const shiftedIndex = (y * width + (x - shiftAmount)) * 4 + 2;
+                        data[shiftedIndex] = copyData[pixelIndex + 2];
+                    }
+                }
+            }
+            break;
+            
+        case 4:
+            // Static noise
+            for (let i = 0; i < data.length; i += 4) {
+                if (Math.random() > 0.9) {
+                    data[i] = 255 * Math.random();     // R
+                    data[i+1] = 255 * Math.random();   // G
+                    data[i+2] = 255 * Math.random();   // B
+                }
+            }
+            break;
+            
+        case 5:
+            // Extreme glitch: blocks + color shifts + noise
+            // Block shuffle
+            const blockWidth = 30;
+            const blockHeight = 30;
+            const numShuffles = 10;
+            
+            for (let i = 0; i < numShuffles; i++) {
+                // Pick two random blocks to swap
+                const x1 = Math.floor(Math.random() * (width - blockWidth));
+                const y1 = Math.floor(Math.random() * (height - blockHeight));
+                const x2 = Math.floor(Math.random() * (width - blockWidth));
+                const y2 = Math.floor(Math.random() * (height - blockHeight));
+                
+                // Copy blocks to temporary arrays
+                const block1 = new Uint8ClampedArray(blockWidth * blockHeight * 4);
+                const block2 = new Uint8ClampedArray(blockWidth * blockHeight * 4);
+                
+                // Extract blocks
+                for (let y = 0; y < blockHeight; y++) {
+                    for (let x = 0; x < blockWidth; x++) {
+                        const sourceIndex1 = ((y1 + y) * width + (x1 + x)) * 4;
+                        const targetIndex1 = (y * blockWidth + x) * 4;
+                        
+                        const sourceIndex2 = ((y2 + y) * width + (x2 + x)) * 4;
+                        const targetIndex2 = (y * blockWidth + x) * 4;
+                        
+                        // Copy pixels to blocks
+                        for (let j = 0; j < 4; j++) {
+                            block1[targetIndex1 + j] = data[sourceIndex1 + j];
+                            block2[targetIndex2 + j] = data[sourceIndex2 + j];
+                        }
+                    }
+                }
+                
+                // Swap blocks
+                for (let y = 0; y < blockHeight; y++) {
+                    for (let x = 0; x < blockWidth; x++) {
+                        const sourceIndex1 = (y * blockWidth + x) * 4;
+                        const targetIndex1 = ((y1 + y) * width + (x1 + x)) * 4;
+                        
+                        const sourceIndex2 = (y * blockWidth + x) * 4;
+                        const targetIndex2 = ((y2 + y) * width + (x2 + x)) * 4;
+                        
+                        // Copy pixels from blocks back to image
+                        for (let j = 0; j < 4; j++) {
+                            data[targetIndex1 + j] = block2[sourceIndex2 + j];
+                            data[targetIndex2 + j] = block1[sourceIndex1 + j];
+                        }
+                    }
+                }
+            }
+            
+            // Add horizontal glitch lines
+            for (let i = 0; i < 10; i++) {
+                const y = Math.floor(Math.random() * height);
+                const lineHeight = Math.floor(Math.random() * 5) + 1;
+                const color = [
+                    Math.floor(Math.random() * 255),
+                    Math.floor(Math.random() * 255),
+                    Math.floor(Math.random() * 255)
+                ];
+                
+                for (let j = 0; j < lineHeight; j++) {
+                    if (y + j < height) {
+                        for (let x = 0; x < width; x++) {
+                            const index = ((y + j) * width + x) * 4;
+                            data[index] = color[0];
+                            data[index + 1] = color[1];
+                            data[index + 2] = color[2];
+                        }
+                    }
+                }
+            }
+            break;
+    }
+    
+    // Put the modified image data back to canvas
+    ctx.putImageData(imageData, 0, 0);
+}
+
+// Quiz functionality module
+// Sample questions for the demo version
+const SAMPLE_QUESTIONS = [
+    {
+        "id": 1,
+        "question": "지구에서 가장 큰 대양은?",
+        "options": ["대서양", "인도양", "태평양", "북극해"],
+        "answer": "태평양"
+    },
+    {
+        "id": 2,
+        "question": "인간의 정상 체온은?",
+        "options": ["36.5°C", "37.5°C", "35.5°C", "38.5°C"],
+        "answer": "36.5°C"
+    },
+    {
+        "id": 3,
+        "question": "물의 화학식은?",
+        "options": ["H2O", "CO2", "O2", "H2O2"],
+        "answer": "H2O"
+    },
+    {
+        "id": 4,
+        "question": "태양계에서 가장 큰 행성은?",
+        "options": ["지구", "토성", "화성", "목성"],
+        "answer": "목성"
+    },
+    {
+        "id": 5,
+        "question": "사람의 심장은 몇 개의 방으로 이루어져 있나?",
+        "options": ["2개", "3개", "4개", "5개"],
+        "answer": "4개"
+    }
+];
+
+// Global variables
+let currentQuestions = [];
+let currentQuestionIndex = 0;
+let wrongAnswers = 0;
+let originalImage = null;
+let distortionLevel = 0;
+
+// DOM Elements
+const uploadSection = document.getElementById('upload-section');
+const quizSection = document.getElementById('quiz-section');
+const resultSection = document.getElementById('result-section');
+const fileInput = document.getElementById('file-input');
+const uploadBox = document.getElementById('upload-box');
+const previewImage = document.getElementById('preview-image');
+const questionContainer = document.getElementById('question-container');
+const progressBar = document.getElementById('progress-bar');
+const feedbackMessage = document.getElementById('feedback-message');
+const loadingSpinner = document.getElementById('loading-spinner');
+const distortionIndicators = document.getElementById('distortion-indicators');
+const resultImage = document.getElementById('result-image');
+const resultMessage = document.getElementById('result-message');
+
+// Initialize the game
+document.addEventListener('DOMContentLoaded', () => {
+    // Set up file upload handler
+    uploadBox.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', handleFileUpload);
+    
+    // Set up submit button handler
+    document.getElementById('submit-btn').addEventListener('click', submitAnswer);
+    
+    // Set up reset button handlers
+    document.querySelectorAll('.btn-reset').forEach(btn => {
+        btn.addEventListener('click', resetGame);
+    });
+});
+
+// Handle file upload 
+function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    // Show loading spinner
+    loadingSpinner.style.display = 'block';
+    
+    // Since this is the demo version without a server, we'll process locally
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        // Create an image element to get dimensions
+        const img = new Image();
+        img.onload = function() {
+            // Store the original image
+            originalImage = e.target.result;
+            
+            // Display the image
+            previewImage.src = originalImage;
+            
+            // Use sample questions for demo
+            currentQuestions = SAMPLE_QUESTIONS;
+            
+            // Reset quiz state
+            currentQuestionIndex = 0;
+            wrongAnswers = 0;
+            distortionLevel = 0;
+            
+            // Show the quiz section
+            uploadSection.style.display = 'none';
+            quizSection.style.display = 'block';
+            
+            // Initialize distortion indicators
+            initDistortionIndicators();
+            
+            // Display the first question
+            displayQuestion();
+            
+            // Hide loading spinner
+            loadingSpinner.style.display = 'none';
+        };
+        img.src = e.target.result;
+    };
+    
+    reader.readAsDataURL(file);
+}
+
+// Initialize distortion level indicators
+function initDistortionIndicators() {
+    distortionIndicators.innerHTML = '';
+    
+    // Create 5 level indicators
+    for (let i = 0; i < 5; i++) {
+        const indicator = document.createElement('div');
+        indicator.className = 'level-indicator';
+        indicator.id = `level-${i + 1}`;
+        distortionIndicators.appendChild(indicator);
+    }
+}
+
+// Update distortion level indicators
+function updateDistortionIndicators() {
+    for (let i = 1; i <= 5; i++) {
+        const indicator = document.getElementById(`level-${i}`);
+        if (indicator) {
+            indicator.className = i <= distortionLevel ? 'level-indicator active' : 'level-indicator';
+        }
+    }
+}
+
+// Display current question
+function displayQuestion() {
+    if (currentQuestionIndex >= currentQuestions.length) {
+        // Quiz completed
+        showResults();
+        return;
+    }
+    
+    const question = currentQuestions[currentQuestionIndex];
+    
+    // Update progress bar
+    const progress = ((currentQuestionIndex) / currentQuestions.length) * 100;
+    progressBar.style.width = `${progress}%`;
+    
+    // Clear any previous feedback message
+    feedbackMessage.innerHTML = '';
+    feedbackMessage.className = 'feedback';
+    
+    // Build the question HTML
+    questionContainer.innerHTML = `
+        <div class="question">${question.question}</div>
+        <div class="options">
+            ${question.options.map((option, index) => `
+                <div class="option" data-index="${index}" data-value="${option}">${option}</div>
+            `).join('')}
+        </div>
+    `;
+    
+    // Add click handlers to options
+    document.querySelectorAll('.option').forEach(option => {
+        option.addEventListener('click', selectOption);
+    });
+}
+
+// Handle option selection
+function selectOption(event) {
+    // Remove selected class from all options
+    document.querySelectorAll('.option').forEach(opt => {
+        opt.classList.remove('selected');
+    });
+    
+    // Add selected class to clicked option
+    event.target.classList.add('selected');
+}
+
+// Submit the current answer
+function submitAnswer() {
+    const selectedOption = document.querySelector('.option.selected');
+    
+    if (!selectedOption) {
+        alert('Please select an answer');
+        return;
+    }
+    
+    const currentQuestion = currentQuestions[currentQuestionIndex];
+    const selectedAnswer = selectedOption.getAttribute('data-value');
+    
+    // Show loading spinner
+    loadingSpinner.style.display = 'block';
+    
+    // Check if answer is correct (since this is a demo without server)
+    const isCorrect = selectedAnswer === currentQuestion.answer;
+    
+    // Process the answer
+    if (isCorrect) {
+        // Correct answer
+        selectedOption.classList.add('correct');
+        feedbackMessage.innerHTML = '정답입니다!';
+        feedbackMessage.className = 'feedback correct-feedback';
+    } else {
+        // Wrong answer
+        selectedOption.classList.add('incorrect');
+        
+        // Find and highlight the correct answer
+        document.querySelectorAll('.option').forEach(opt => {
+            if (opt.getAttribute('data-value') === currentQuestion.answer) {
+                opt.classList.add('correct');
+            }
+        });
+        
+        feedbackMessage.innerHTML = '틀렸습니다. 정답은 ' + currentQuestion.answer + ' 입니다.';
+        feedbackMessage.className = 'feedback incorrect-feedback';
+        
+        // Increment wrong answers count
+        wrongAnswers++;
+        
+        // Update distortion level (max 5)
+        distortionLevel = Math.min(5, wrongAnswers);
+        updateDistortionIndicators();
+        
+        // Apply distortion to the image locally (since this is a demo)
+        const img = new Image();
+        img.onload = function() {
+            // Create canvas for distortion
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            
+            // Draw original image
+            ctx.drawImage(img, 0, 0);
+            
+            // First simulate face detection
+            simulateFaceDetection(img).then(faceData => {
+                // Apply distortion effects
+                // First apply general distortion
+                applyCanvasDistortion(ctx, canvas.width, canvas.height, distortionLevel);
+                
+                // Then apply facial feature distortion if face detected
+                distortFacialFeatures(canvas, faceData, distortionLevel);
+                
+                // Update image
+                previewImage.src = canvas.toDataURL('image/jpeg');
+                
+                // Add glitch animation class temporarily
+                previewImage.classList.add('image-glitch');
+                setTimeout(() => {
+                    previewImage.classList.remove('image-glitch');
+                }, 500);
+                
+                // Hide loading spinner
+                loadingSpinner.style.display = 'none';
+            });
+        };
+        img.src = previewImage.src;
+    }
+    
+    // Disable option selection for a moment to show feedback
+    document.querySelectorAll('.option').forEach(opt => {
+        opt.style.pointerEvents = 'none';
+    });
+    
+    // Move to next question after a delay
+    setTimeout(() => {
+        currentQuestionIndex++;
+        displayQuestion();
+        loadingSpinner.style.display = 'none';
+    }, 2000);
+}
+
+// Show results at the end of the quiz
+function showResults() {
+    quizSection.style.display = 'none';
+    resultSection.style.display = 'block';
+    
+    // Display the final distorted image
+    resultImage.src = previewImage.src;
+    
+    // Set result message based on performance
+    if (wrongAnswers === 0) {
+        resultMessage.textContent = '축하합니다! 모든 질문에 정확히 답했습니다. 당신의 이미지는 완벽하게 보존되었습니다!';
+    } else if (wrongAnswers <= 2) {
+        resultMessage.textContent = '잘했습니다! 몇 가지 오류가 있었지만 이미지는 여전히 꽤 인식할 수 있습니다.';
+    } else if (wrongAnswers <= 4) {
+        resultMessage.textContent = '음... 많은 오류로 인해 이미지가 상당히 왜곡되었습니다.';
+    } else {
+        resultMessage.textContent = '이런! 너무 많은 오류가 발생했습니다. 당신의 이미지는 예술적으로 변형되었습니다!';
+    }
+}
+
+// Reset the game
+function resetGame() {
+    // Reset all sections visibility
+    uploadSection.style.display = 'block';
+    quizSection.style.display = 'none';
+    resultSection.style.display = 'none';
+    
+    // Clear the file input
+    fileInput.value = '';
+    
+    // Reset state variables
+    currentQuestions = [];
+    currentQuestionIndex = 0;
+    wrongAnswers = 0;
+    distortionLevel = 0;
+    
+    // Clear images
+    previewImage.src = '';
+    resultImage.src = '';
+    
+    // Reset progress bar
+    progressBar.style.width = '0%';
+}
+
+// Show error message
+function showError(message) {
+    alert('Error: ' + message);
+}
+    </script>
+</body>
+</html>
